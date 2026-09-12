@@ -19,3 +19,9 @@ Entries are appended automatically by the agent per `.cursor/rules/chat-history-
 - user_prompt: "Build Phase 1 server: Postman-testable categories/quizzes, Prisma seed, migrate, ts-node"
 - assistant_response_summary: "Scaffolded server/ with Express, Prisma SQLite schema (full domain), seed (3 categories, 6 quizzes, 30 questions), GET /api/categories and GET /api/quizzes/:quizId, ts-node dev script; ran migrate init and seed successfully."
 - files_affected: "server/package.json, server/tsconfig.json, server/.env.example, server/prisma/schema.prisma, server/prisma/seed.ts, server/prisma/migrations/20260912145453_init/migration.sql, server/src/index.ts, server/src/app.ts, server/src/config.ts, server/src/lib/prisma.ts, server/src/middleware/errorHandler.ts, server/src/routes/categories.ts, server/src/routes/quizzes.ts, server/src/services/catalogService.ts, package.json, .gitignore"
+
+---
+- timestamp: "2026-09-12T11:01:00-04:00"
+- user_prompt: "Phase 2 client: landing view, Vite/React/MUI, wire API for categories and responses"
+- assistant_response_summary: "Scaffolded client/ with Vite+React+TS, MUI v6 theme, api client with dev proxy to :3001, LandingPage listing categories/quizzes from GET /api/categories and quiz detail on click; debug accordion shows raw JSON."
+- files_affected: "client/vite.config.ts, client/.env.example, client/index.html, client/src/App.tsx, client/src/main.tsx, client/src/index.css, client/src/theme.ts, client/src/api/client.ts, client/src/api/catalog.ts, client/src/api/types.ts, client/src/pages/LandingPage.tsx, package.json"
