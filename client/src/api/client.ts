@@ -33,3 +33,27 @@ export async function apiGet<T>(path: string): Promise<T> {
 
   return response.json() as Promise<T>;
 }
+
+export async function apiPost<T>(path: string, body: unknown): Promise<T> {
+  const url = `${apiBase}${path}`;
+  const response = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+
+  if (!response.ok) {
+    let message = `Request failed (${response.status})`;
+    let code: string | undefined;
+    try {
+      const errorBody = (await response.json()) as ApiErrorBody;
+      if (errorBody.error?.message) message = errorBody.error.message;
+      code = errorBody.error?.code;
+    } catch {
+      // non-JSON error body
+    }
+    throw new ApiError(message, response.status, code);
+  }
+
+  return response.json() as Promise<T>;
+}

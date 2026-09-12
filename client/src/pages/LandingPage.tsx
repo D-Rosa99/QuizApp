@@ -1,9 +1,6 @@
 import QuizOutlinedIcon from "@mui/icons-material/QuizOutlined";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import {
-  Accordion,
-  AccordionDetails,
-  AccordionSummary,
   Alert,
   Box,
   Button,
@@ -20,25 +17,21 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { useCallback, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { ApiError } from "../api/client";
-import { fetchCategories, fetchQuiz } from "../api/catalog";
-import type { CategoriesResponse, QuizDetail } from "../api/types";
+import { fetchCategories } from "../api/catalog";
+import type { CategoriesResponse } from "../api/types";
 
 export function LandingPage() {
+  const navigate = useNavigate();
   const [data, setData] = useState<CategoriesResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedQuiz, setSelectedQuiz] = useState<QuizDetail | null>(null);
-  const [quizLoadingId, setQuizLoadingId] = useState<string | null>(null);
-  const [quizError, setQuizError] = useState<string | null>(null);
 
   const loadCategories = useCallback(async () => {
     setLoading(true);
     setError(null);
-    setSelectedQuiz(null);
-    setQuizError(null);
     try {
       const response = await fetchCategories();
       setData(response);
@@ -60,24 +53,8 @@ export function LandingPage() {
     void loadCategories();
   }, [loadCategories]);
 
-  const handleQuizClick = async (quizId: string) => {
-    setQuizLoadingId(quizId);
-    setQuizError(null);
-    try {
-      const quiz = await fetchQuiz(quizId);
-      setSelectedQuiz(quiz);
-    } catch (err) {
-      const message =
-        err instanceof ApiError
-          ? err.message
-          : err instanceof Error
-            ? err.message
-            : "Could not load quiz";
-      setQuizError(message);
-      setSelectedQuiz(null);
-    } finally {
-      setQuizLoadingId(null);
-    }
+  const handleQuizClick = (quizId: string) => {
+    navigate(`/quiz/${quizId}`, { state: { startNew: true } });
   };
 
   const totalQuizzes =
@@ -185,11 +162,7 @@ export function LandingPage() {
                     <List dense disablePadding>
                       {category.quizzes.map((quiz) => (
                         <ListItem key={quiz.id} disablePadding>
-                          <ListItemButton
-                            selected={selectedQuiz?.id === quiz.id}
-                            onClick={() => void handleQuizClick(quiz.id)}
-                            disabled={quizLoadingId === quiz.id}
-                          >
+                          <ListItemButton onClick={() => handleQuizClick(quiz.id)}>
                             <ListItemText
                               primary={quiz.title}
                               secondary={quiz.description}
@@ -208,60 +181,6 @@ export function LandingPage() {
                 </Card>
               ))}
             </Box>
-          )}
-
-          {quizError && <Alert severity="warning">{quizError}</Alert>}
-
-          {(data || selectedQuiz) && (
-            <Accordion>
-              <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                <Typography fontWeight={600}>API responses (debug)</Typography>
-              </AccordionSummary>
-              <AccordionDetails>
-                <Stack spacing={2}>
-                  {data && (
-                    <Box>
-                      <Typography variant="subtitle2" gutterBottom>
-                        GET /api/categories
-                      </Typography>
-                      <Box
-                        component="pre"
-                        sx={{
-                          m: 0,
-                          p: 2,
-                          bgcolor: "grey.100",
-                          borderRadius: 1,
-                          overflow: "auto",
-                          fontSize: 12,
-                        }}
-                      >
-                        {JSON.stringify(data, null, 2)}
-                      </Box>
-                    </Box>
-                  )}
-                  {selectedQuiz && (
-                    <Box>
-                      <Typography variant="subtitle2" gutterBottom>
-                        GET /api/quizzes/{selectedQuiz.id}
-                      </Typography>
-                      <Box
-                        component="pre"
-                        sx={{
-                          m: 0,
-                          p: 2,
-                          bgcolor: "grey.100",
-                          borderRadius: 1,
-                          overflow: "auto",
-                          fontSize: 12,
-                        }}
-                      >
-                        {JSON.stringify(selectedQuiz, null, 2)}
-                      </Box>
-                    </Box>
-                  )}
-                </Stack>
-              </AccordionDetails>
-            </Accordion>
           )}
         </Stack>
       </Container>
