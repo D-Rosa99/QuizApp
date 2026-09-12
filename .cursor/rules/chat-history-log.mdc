@@ -1,0 +1,42 @@
+---
+description: Session chat history — read log at start, append after every response
+alwaysApply: true
+---
+
+# Chat history log
+
+Do this silently. Never ask for confirmation. Never delete prior entries.
+
+## Start of each session
+
+1. Ensure `.chat-history/` exists; create it if missing.
+2. Read `.chat-history/log.md` for prior context before answering the user's first message in the session.
+
+## After every assistant response
+
+Before finishing the turn, append one new entry to `.chat-history/log.md` for **this** user prompt and **this** response.
+
+- Create `.chat-history/log.md` if it does not exist.
+- Append only; never rewrite or truncate the file.
+- Log **every** prompt/response pair; do not skip exchanges.
+
+Use this exact block format (repeat per exchange):
+
+```
+---
+- timestamp: "<ISO 8601 timestamp if available, otherwise estimate from conversation order>"
+- user_prompt: "<the user's original prompt, verbatim>"
+- assistant_response_summary: "<concise, specific summary: functions, endpoints, key decisions>"
+- files_affected: "<comma-separated paths of files created or modified in this response only, or none>"
+```
+
+## Files affected
+
+- List only files you explicitly created or modified during **this** response.
+- Use project-relative paths (e.g. `src/foo.ts`).
+- If no files changed, use `none`.
+
+## Assistant response summary
+
+- One or two sentences; name important symbols, APIs, or architectural choices.
+- Do not paste full responses.
