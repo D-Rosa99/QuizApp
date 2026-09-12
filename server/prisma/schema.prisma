@@ -1,0 +1,102 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum AttemptStatus {
+  in_progress
+  completed
+}
+
+model Category {
+  id          String @id @default(cuid())
+  slug        String @unique
+  title       String
+  description String
+  sortOrder   Int
+  quizzes     Quiz[]
+}
+
+model Quiz {
+  id          String     @id @default(cuid())
+  categoryId  String
+  category    Category   @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  slug        String
+  title       String
+  description String
+  sortOrder   Int
+  questions   Question[]
+  attempts    Attempt[]
+
+  @@unique([categoryId, slug])
+}
+
+model Question {
+  id          String          @id @default(cuid())
+  quizId      String
+  quiz        Quiz            @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  prompt      String
+  explanation String
+  sortOrder   Int
+  options     Option[]
+  answers     AttemptAnswer[]
+
+  @@unique([quizId, sortOrder])
+}
+
+model Option {
+  id         String          @id @default(cuid())
+  questionId String
+  question   Question        @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  label      String
+  sortOrder  Int
+  isCorrect  Boolean         @default(false)
+  answers    AttemptAnswer[]
+
+  @@unique([questionId, sortOrder])
+}
+
+model Participant {
+  id         String    @id
+  createdAt  DateTime  @default(now())
+  lastSeenAt DateTime  @updatedAt
+  attempts   Attempt[]
+}
+
+model Attempt {
+  id                 String        @id @default(cuid())
+  participantId      String
+  participant        Participant   @relation(fields: [participantId], references: [id], onDelete: Cascade)
+  quizId             String
+  quiz               Quiz          @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  status             AttemptStatus @default(in_progress)
+  score              Int?
+  maxScore           Int?
+  performanceMessage String?
+  startedAt          DateTime      @default(now())
+  completedAt        DateTime?
+  answers            AttemptAnswer[]
+
+  @@index([participantId, startedAt])
+  @@index([quizId])
+}
+
+model AttemptAnswer {
+  id             String   @id @default(cuid())
+  attemptId      String
+  attempt        Attempt  @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  questionId     String
+  question       Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  optionId       String
+  option         Option   @relation(fields: [optionId], references: [id], onDelete: Cascade)
+  isCorrect      Boolean
+  pointsEarned   Int
+  answeredAt     DateTime @default(now())
+  idempotencyKey String?
+
+  @@unique([attemptId, questionId])
+}

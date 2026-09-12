@@ -1,0 +1,9 @@
+{
+  "name": "quizapp",
+  "private": true,
+  "scripts": {
+    "dev:server": "npm run dev --prefix server",
+    "db:migrate": "npm run db:migrate --prefix server",
+    "db:seed": "npm run db:seed --prefix server"
+  }
+}
